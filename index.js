@@ -16,7 +16,7 @@ const fs = require('fs');
 
   let books = []
   let links = await page.$$('#kp-notebook-library > div > span > a')
-  var currentIndex = 1
+  let currentIndex = 1
 
   while(currentIndex < links.length) {
     console.log(`about to click link ${currentIndex}`)
@@ -28,13 +28,20 @@ const fs = require('fs');
 
     console.log(`clicked link ${currentIndex}`)
 
-    let book = {}
-  	book['author'] = await page.$eval('div.a-span5 > p.a-spacing-none.kp-notebook-metadata', text => text.textContent);
-  	book['title'] = await page.$eval('h3', text => text.textContent);
-  	book['highlights'] = await page.$$eval('#highlight', highlights => {
-  		return highlights.map(highlight => highlight.textContent)
-  	})
-  	books.push(book)
+  	let author = await page.$eval('div.a-span5 > p.a-spacing-none.kp-notebook-metadata', text => text.textContent);
+  	let title = await page.$eval('h3', text => text.textContent);
+  	let highlights = await page.$$('#highlight')
+
+    for(let highlight of highlights) {
+      let quote = await highlight.evaluate((node) => node.innerText)
+      let book = {
+        'author': author,
+        'title': title,
+        'highlight': quote
+      }
+      console.log(book)
+      books.push(book)
+    }
 
     console.log(`about to go back`)
 
